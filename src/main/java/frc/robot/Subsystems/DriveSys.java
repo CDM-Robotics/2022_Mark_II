@@ -91,7 +91,7 @@ public class DriveSys implements Subsystem {
 
     public double getLeftTicks() {
 
-      return L_Master.getSensorCollection().getIntegratedSensorPosition();
+      return -L_Master.getSensorCollection().getIntegratedSensorPosition();
     }
 
     public double getLeftVelocity() {
@@ -113,21 +113,6 @@ public class DriveSys implements Subsystem {
 
       //return ticks * 18.84956 / 2048;
       return ticks; 
-    }
-
-    private void pushToSmartDashboard() {
-
-      SmartDashboard.putNumber("x position: ", CurrentPositionXYA.xCoord);
-      SmartDashboard.putNumber("y position: ", CurrentPositionXYA.yCoord);
-      SmartDashboard.putNumber("total distance traveled: ", totalDistanceTraveled);
-
-      SmartDashboard.putNumber("x position inches: ", CurrentPositionXYA.xCoord * DriveSystemConstants.TICK_TO_INCH_RATIO);
-      SmartDashboard.putNumber("y position inches: ", CurrentPositionXYA.yCoord * DriveSystemConstants.TICK_TO_INCH_RATIO);
-      SmartDashboard.putNumber("total distance traveled inches: ", totalDistanceTraveled * DriveSystemConstants.TICK_TO_INCH_RATIO);
-      
-
-      SmartDashboard.putNumber("right side ticks:  ", R_Master.getSensorCollection().getIntegratedSensorPosition()); 
-      SmartDashboard.putNumber("left side ticks: ", -1 * L_Master.getSensorCollection().getIntegratedSensorPosition());
     }
 
     public PositionPoint getAbsolutePosition() {
@@ -218,9 +203,6 @@ public class DriveSys implements Subsystem {
       totalDistanceTraveled += distanceTraveled; 
 
       CurrentPositionXYA.angleCumulative += AngleChange; 
-
-
-      pushToSmartDashboard();
 
       return CurrentPositionXYA; 
 

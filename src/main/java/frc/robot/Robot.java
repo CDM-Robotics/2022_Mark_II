@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -13,7 +14,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
+import frc.robot.Pathfinder.Path.Bezier;
 import frc.robot.Pathfinder.Path.PositionPoint;
+import frc.robot.Pathfinder.Path.Waypoint;
 import frc.robot.Subsystems.DriveSys;
 
 /**
@@ -29,6 +32,11 @@ public class Robot extends TimedRobot {
   private PositionPoint e; 
 
   private AHRS ahrs;
+
+  public Waypoint w1 = new Waypoint(0, 100);
+  public Waypoint w2 = new Waypoint(0, 0); 
+  public Waypoint w3 = new Waypoint(200, 0);
+  
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -37,20 +45,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
 
-    DriveSys.getInstance(); 
-    
-    try {
-      /* Communicate w/navX-MXP via the MXP SPI Bus.                                     */
-      /* Alternatively:  I2C.Port.kMXP, SerialPort.Port.kMXP or SerialPort.Port.kUSB     */
-      /* See http://navx-mxp.kauailabs.com/guidance/selecting-an-interface/ for details. */
-      ahrs = new AHRS(SPI.Port.kMXP); 
-    } catch (RuntimeException ex ) {
-
-    SmartDashboard.putString("Error instantiating navX-MXP:  " , ex.getMessage()); 
-    }
-
-    NavX.connectToClassMethods(ahrs);
-    NavX.getInstance(); 
    
   }
 
@@ -63,7 +57,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    NavX.pushToSmartDashboard();
+    
   }
 
   /**
@@ -78,6 +72,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+
+    Bezier.getBezierPoints(w1, w2, w3);
    
   }
 
@@ -96,7 +92,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-    e = DriveSys.getInstance().getAbsolutePosition(); 
   }
 
   /** This function is called once when the robot is disabled. */

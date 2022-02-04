@@ -9,6 +9,13 @@ public class Waypoint {
 
     private double x, y, a; 
 
+    public Waypoint(double x, double y) {
+
+        this.x = x; 
+        this.y = y;  
+        a = 0; 
+    }
+
     public Waypoint(double x, double y, double a) {
 
         this.x = x; 
