@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
@@ -14,10 +15,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
-import frc.robot.Pathfinder.Path.Bezier;
+import frc.robot.Commands.ArcadeDriveCommand;
+import frc.robot.Commands.IntakeControlCommand;
+import frc.robot.Commands.ShooterControlCommand;
+import frc.robot.Constants.ControlBoard;
 import frc.robot.Pathfinder.Path.PositionPoint;
-import frc.robot.Pathfinder.Path.Waypoint;
+
 import frc.robot.Subsystems.DriveSys;
+import frc.robot.Subsystems.IntakeSys;
+import frc.robot.Subsystems.ShooterSys;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -29,13 +35,7 @@ public class Robot extends TimedRobot {
 
   private CommandScheduler mScheduler; 
 
-  private PositionPoint e; 
-
-  private AHRS ahrs;
-
-  public Waypoint w1 = new Waypoint(0, 100);
-  public Waypoint w2 = new Waypoint(0, 0); 
-  public Waypoint w3 = new Waypoint(200, 0);
+ 
   
   
   /**
@@ -45,7 +45,12 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
 
-   
+   mScheduler = CommandScheduler.getInstance();
+
+   ControlBoard.getInstance(); 
+   DriveSys.getInstance(); 
+   ShooterSys.getInstance(); 
+   //IntakeSys.getInstance();
   }
 
   /**
@@ -73,7 +78,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
 
-    Bezier.getBezierPoints(w1, w2, w3);
    
   }
 
@@ -86,11 +90,30 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+
+    mScheduler.cancelAll();
+
+    
+    
+    //ArcadeDriveCommand arcadeDriveCMD = new ArcadeDriveCommand(ControlBoard.getInstance().mDrivestick); 
+    ArcadeDriveCommand arcadeDriveCMD = new ArcadeDriveCommand(ControlBoard.getInstance().mShootStick); 
+
+    ShooterControlCommand shootControlCMD = new ShooterControlCommand(ControlBoard.getInstance().mShootStick);
+
+    //IntakeControlCommand intakeControlCMD = new IntakeControlCommand(ControlBoard.getInstance().mShootStick);
+
+
+    mScheduler.schedule(arcadeDriveCMD);
+    mScheduler.schedule(shootControlCMD);
+    //mScheduler.schedule(intakeControlCMD);
+  }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+
+    mScheduler.run();
 
   }
 

@@ -10,11 +10,34 @@ import edu.wpi.first.wpilibj.command.WaitCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Add your docs here. */
-public class Bezier {
+public class BezierCurve {
+
+
+    public static TempPoint getNextPower(double iNum, TempPoint w0, TempPoint w1) {
+
+        TempPoint waypoint0 = w0; 
+        TempPoint waypoint1 = w1; 
+
+        double rX = waypoint1.x - waypoint0.x; 
+        double rY = waypoint1.y - waypoint0.y; 
+
+        double nX = waypoint0.x + (rX * (iNum / Path.iterationAccuracy_double)); 
+        double nY = waypoint0.y + (rY * (iNum / Path.iterationAccuracy_double)); 
+
+        return new TempPoint(nX, nY); 
+    }
+
+
+
+
+
+
+
+
 
     
 
-    public static void getBezierPoints(Waypoint p1, Waypoint p2, Waypoint p3) {
+    /* public static void getBezierPoints(Waypoint p1, Waypoint p2, Waypoint p3) {
 
         int bezierCount = 10; 
 
@@ -120,5 +143,5 @@ public class Bezier {
         }
 
     }
-
+ */
 }
