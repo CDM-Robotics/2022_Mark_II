@@ -11,9 +11,9 @@ import frc.robot.Subsystems.IntakeSys;
 
 public class IntakeControlCommand extends CommandBase {
 
-  LogitechDualAction mStick2; 
+  LogitechJoystick mStick2; 
   /** Creates a new IntakeControlCommand. */
-  public IntakeControlCommand(LogitechDualAction stick) {
+  public IntakeControlCommand(LogitechJoystick stick) {
     // Use addRequirements() here to declare subsystem dependencies.
     mStick2 = stick; 
     addRequirements(IntakeSys.getInstance());
@@ -30,7 +30,9 @@ public class IntakeControlCommand extends CommandBase {
   @Override
   public void execute() {
 
-    IntakeSys.getInstance().IntakeOutIn(mStick2.getRawButtonPressed(5));
+    IntakeSys.getInstance().IntakeOutIn(mStick2.getRawButtonPressed(2));
+
+    IntakeSys.getInstance().runIntake(mStick2.getRawButton(1));
   }
 
   // Called once the command ends or is interrupted.

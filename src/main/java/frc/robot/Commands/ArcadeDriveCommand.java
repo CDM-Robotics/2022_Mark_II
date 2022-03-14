@@ -4,6 +4,7 @@
 
 package frc.robot.Commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.LogitechDualAction;
 import frc.robot.LogitechJoystick;
@@ -12,7 +13,7 @@ import frc.robot.Subsystems.DriveSys;
 public class ArcadeDriveCommand extends CommandBase {
 
   //LogitechJoystick mStick; 
-  LogitechDualAction mStick; 
+  LogitechJoystick mStick; 
   /** Creates a new ArcadeDriveCommand. */
 
 
@@ -24,7 +25,7 @@ public class ArcadeDriveCommand extends CommandBase {
     this.mStick = mStick; 
   } */
 
-  public ArcadeDriveCommand(LogitechDualAction tStick) {
+  public ArcadeDriveCommand(LogitechJoystick tStick) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(DriveSys.getInstance());
 
@@ -42,7 +43,11 @@ public class ArcadeDriveCommand extends CommandBase {
   @Override
   public void execute() {
 
-    DriveSys.getInstance().arcadeDrive(mStick.getY(), mStick.getX());
+    DriveSys.getInstance().arcadeDrive(-mStick.getY(), mStick.getX(), (mStick.getRawAxis(3) - 1) / -2);
+
+    SmartDashboard.putNumber("speed Val", ((mStick.getRawAxis(3) - 1) / -2)); 
+
+    //DriveSys.getInstance().sideIndependentControl(-mStick.getY(), -mStick.getRawAxis(3));
   }
 
   // Called once the command ends or is interrupted.

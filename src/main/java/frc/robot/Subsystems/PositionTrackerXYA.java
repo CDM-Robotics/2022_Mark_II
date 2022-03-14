@@ -4,7 +4,10 @@
 
 package frc.robot.Subsystems;
 
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.NavX;
 import frc.robot.Constants.DriveSystemConstants;
 import frc.robot.Constants.PathfindingConstants;
 import frc.robot.Pathfinder.Path.PositionPoint;
@@ -79,7 +82,7 @@ public class PositionTrackerXYA {
       double relativeDistanceTicksLeft = -DriveSys.getInstance().getLeftTicks() + pastXYA.leftTicks; 
       double relativeDistanceTicksRight = DriveSys.getInstance().getRightTicks() - pastXYA.rightTicks; 
 
-      //double angle = Math.abs(PreviousPositionXYA.angle - NavX.getInstance().getFusedHeading());
+      //double AngleChange = Math.abs(pastXYA.angleCumulative - NavX.getInstance());
       double AngleChange = Math.abs((360 * (relativeDistanceTicksLeft - relativeDistanceTicksRight) * DriveSystemConstants.TICK_TO_INCH_RATIO) / (26.85 * 2 * Math.PI)); 
 
       if (relativeDistanceTicksRight > relativeDistanceTicksLeft) {
@@ -90,6 +93,8 @@ public class PositionTrackerXYA {
 
       SmartDashboard.putNumber("angleChange", AngleChange); 
       SmartDashboard.putNumber("angleChangeAbsolute", AngleChangeAbsolute);
+
+      
       
 
       //SmartDashboard.putNumber("relative distance inches right", relativeDistanceTicksRight); 
@@ -160,6 +165,7 @@ public class PositionTrackerXYA {
       totalDistanceTraveled += distanceTraveled; 
 
       presentXYA.angleCumulative += AngleChange; 
+
     }
 
 

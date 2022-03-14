@@ -9,10 +9,14 @@ public class IntakeSysConstants {
 
     public static final int Intake = 8;
 
-    public static final boolean Intake_isInverted = false; 
+    public static final boolean Intake_isInverted = true; 
 
-    public static final int Solenoid_1_channel = 0; 
-    public static final int Solenoid_2_channel = 0; 
-    public static final int Solenoid_3_channel = 0; 
+    public static final int Solenoid_1_channel = 5; 
+    public static final int Solenoid_2_channel = 1; 
+    public static final int Solenoid_3_channel = 7; 
+
+    public static final int Solenoid_1_channel0 = 4; 
+    public static final int Solenoid_2_channel0 = 0; 
+    public static final int Solenoid_3_channel0 = 6; 
 
 }

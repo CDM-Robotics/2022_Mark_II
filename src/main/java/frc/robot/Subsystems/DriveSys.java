@@ -9,6 +9,7 @@ import java.lang.invoke.LambdaMetafactory;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -28,11 +29,7 @@ public class DriveSys implements Subsystem {
 
   private WPI_TalonFX R_Master; 
   private WPI_TalonFX R_Slave; 
-
-  private PositionPoint presentXYA; 
-  private PositionPoint pastXYA;
-
-  private double totalDistanceTraveled; 
+  
 
   public static DriveSys getInstance() {
 
@@ -51,14 +48,12 @@ public class DriveSys implements Subsystem {
     R_Master = new WPI_TalonFX(DriveSystemConstants.RIGHT_FALCON_MASTER); 
     R_Slave = new WPI_TalonFX(DriveSystemConstants.RIGHT_FALCON_SLAVE);
 
-    totalDistanceTraveled = 0; 
-
     configMotors();
   }
 
   public void configMotors() {
 
-    L_Slave.follow(L_Master);
+    L_Master.follow(L_Slave);
     R_Slave.follow(R_Master);
 
     L_Master.setInverted(DriveSystemConstants.LEFT_FALCON_MASTER_isInverted);
@@ -70,7 +65,9 @@ public class DriveSys implements Subsystem {
     R_Master.getSensorCollection().setIntegratedSensorPosition(0.0, 0);
     L_Master.getSensorCollection().setIntegratedSensorPosition(0.0, 0);
 
-    mDifferentialDrive = new DifferentialDrive(L_Master, R_Master);
+
+
+    mDifferentialDrive = new DifferentialDrive(L_Slave, R_Master);
     }
 
     /**
@@ -79,13 +76,82 @@ public class DriveSys implements Subsystem {
      */
     public void sideIndependentControl(double leftPercentOut, double rightPercentOut) {
 
-      R_Master.set(ControlMode.PercentOutput, rightPercentOut);
-      L_Master.set(ControlMode.PercentOutput, leftPercentOut);
+      R_Master.set(ControlMode.PercentOutput, rightPercentOut/2.3);
+      L_Slave.set(ControlMode.PercentOutput, leftPercentOut/2.3);
     }
 
-    public void arcadeDrive(double mag, double yaw) {
+    double speed = 0.8; 
+    boolean magIsPositive;
+    boolean yawIsPositive; 
 
-        mDifferentialDrive.arcadeDrive(-mag/5, yaw/5);
+    public void arcadeDrive(double mag, double yaw, double speed) {
+/* 
+        double leftMag; 
+        double rightMag; 
+      
+        //mLog.periodicPrint("mag: " + mag + "  yaw: " + yaw + "  maxPercentOut: " + speed, 25);
+       
+        speed = (((0.7+(speed * 0.3)) ) / 3);
+        magIsPositive = (mag > 0);
+        yawIsPositive = (yaw > 0); 
+        
+        yaw = 1 - Math.abs(yaw);
+        
+        if (yaw > 0.9) {// to drive straight forward or backward
+
+            leftMag = mag * speed; 
+            rightMag = mag * speed; 
+
+        }else if ((yaw < 0.50) && (Math.abs(mag)< 0.35)) {// to turn in place 
+
+            yaw = 1 - yaw; 
+
+            if (yawIsPositive) {
+
+                leftMag = yaw * speed / 1.4;
+                rightMag = yaw * speed * -1 / 1.4;
+            } else {
+
+                leftMag = yaw * speed * -1 / 1.4;
+                rightMag = yaw * speed / 1.4;
+            }
+
+        } else { // to turn and move. 
+        
+            mag = DriveSystemConstants.DRIVE_MIN_PERCENT_OUT + ((mag * mag) * (1 - DriveSystemConstants.DRIVE_MIN_PERCENT_OUT));
+            
+            if (magIsPositive) {
+
+                if (yawIsPositive) {
+
+                    leftMag = mag * speed; 
+                    rightMag = mag * (0.5 + (yaw/2)) * speed; 
+                }else{
+
+                    rightMag = mag * speed; 
+                    leftMag = mag * (0.5 + (yaw/2)) * speed; 
+                }
+
+            }else{
+
+                if (yawIsPositive) {
+
+                    leftMag = mag * speed * -1; 
+                    rightMag = mag * (0.5 + (yaw/2)) * speed * -1;
+                }else{
+
+                    rightMag = mag * speed * -1; 
+                    leftMag = mag * (0.5 + (yaw/2)) * speed * -1; 
+                }
+            }     
+        }  
+
+        L_Master.set(ControlMode.PercentOutput, leftMag);
+        R_Master.set(ControlMode.PercentOutput, rightMag); */
+
+
+
+        mDifferentialDrive.arcadeDrive((mag * (0.35 + (0.2 * speed))) , (yaw * (0.35 + (0.2 * speed))), false);
       
     }
 

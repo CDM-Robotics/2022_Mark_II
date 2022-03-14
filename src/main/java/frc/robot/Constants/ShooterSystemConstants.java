@@ -26,4 +26,8 @@ public class ShooterSystemConstants {
 
     public static final double verticalEncoderInitial = 0; 
     public static final double horizontalEncoderInitial = 0; 
+
+    public static final int IntakeSideLimitNumber = 8; 
+    public static final int InverseSideLimitNumber = 9; 
+
 }

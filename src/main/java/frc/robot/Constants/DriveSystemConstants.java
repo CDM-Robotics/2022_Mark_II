@@ -12,8 +12,10 @@ public class DriveSystemConstants {
     public static final int RIGHT_FALCON_MASTER = 6; 
     public static final int RIGHT_FALCON_SLAVE = 7; 
 
-    public static final boolean LEFT_FALCON_MASTER_isInverted = false; 
+    public static final boolean LEFT_FALCON_MASTER_isInverted = true; 
     public static final boolean RIGHT_FALCON_MASTER_isInverted = false;
+
+    public static final double DRIVE_MIN_PERCENT_OUT = 0.3; 
     
     
 

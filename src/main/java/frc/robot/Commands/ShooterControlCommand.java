@@ -1,5 +1,6 @@
 package frc.robot.Commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.LogitechDualAction;
 import frc.robot.LogitechJoystick;
@@ -29,8 +30,12 @@ public class ShooterControlCommand extends CommandBase {
 
     ShooterSys.getInstance().runSerializer(mStick1.getRawButton(8));
     ShooterSys.getInstance().shooterAimControl(mStick1);
-    ShooterSys.getInstance().ShooterSpinUpToggle(mStick1.getRawButtonPressed(6));
+    ShooterSys.getInstance().ShooterSpinUpToggle(mStick1.getRawButtonPressed(6), mStick1.getRawButton(5));
+    ShooterSys.getInstance().pushToSmartDashboard();
+    ShooterSys.getInstance().defaultPosition(mStick1.getRawButtonPressed(4));
 
+    SmartDashboard.putNumber("stick y", mStick1.getRawAxis(3)); 
+    SmartDashboard.putNumber("stick x", mStick1.getX()); 
   }
 
   // Called once the command ends or is interrupted.

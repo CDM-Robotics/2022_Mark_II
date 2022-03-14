@@ -16,14 +16,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import frc.robot.Commands.ArcadeDriveCommand;
+import frc.robot.Commands.ClimbCommand;
 import frc.robot.Commands.IntakeControlCommand;
 import frc.robot.Commands.ShooterControlCommand;
 import frc.robot.Constants.ControlBoard;
 import frc.robot.Pathfinder.Path.PositionPoint;
-
+import frc.robot.Subsystems.ClimberSys;
 import frc.robot.Subsystems.DriveSys;
 import frc.robot.Subsystems.IntakeSys;
+import frc.robot.Subsystems.PositionTrackerXYA;
 import frc.robot.Subsystems.ShooterSys;
+import frc.robot.Subsystems.VisionSys;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -50,7 +53,15 @@ public class Robot extends TimedRobot {
    ControlBoard.getInstance(); 
    DriveSys.getInstance(); 
    ShooterSys.getInstance(); 
-   //IntakeSys.getInstance();
+   IntakeSys.getInstance();
+   VisionSys.getInstance(); 
+   ClimberSys.getInstance(); 
+  
+  PositionTrackerXYA.getInstance().CalculatePositionData(); 
+  PositionTrackerXYA.getInstance().pushToSmartDashboard();
+
+   NavX.getInstance();
+   
   }
 
   /**
@@ -78,15 +89,42 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
 
-   
+   ShooterSys.getInstance().ShooterSpinUpToggle(true, false);
+   AutoCount = 0;
   }
 
+  int AutoCount = 0; 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
     
+    ShooterSys.getInstance().ShooterSpinUpToggle(false, false);
+  if (AutoCount < 125) {
+
+    DriveSys.getInstance().sideIndependentControl(0.3, 0.3);
+
+    if (AutoCount < 50) {
+
+      ShooterSys.getInstance().turnAimShoot(true, false, false);
+    }
     
+  } else {
+
+    DriveSys.getInstance().sideIndependentControl(0, 0);
   }
+    AutoCount++; 
+
+    if ((AutoCount < 200) && (AutoCount > 50)) {
+
+      ShooterSys.getInstance().turnAimShoot(false, true, false);
+    }
+
+    if ((AutoCount < 750 ) && (AutoCount > 400)) {
+
+      ShooterSys.getInstance().turnAimShoot(false, false, true);
+    } 
+  }
+
 
   /** This function is called once when teleop is enabled. */
   @Override
@@ -97,16 +135,19 @@ public class Robot extends TimedRobot {
     
     
     //ArcadeDriveCommand arcadeDriveCMD = new ArcadeDriveCommand(ControlBoard.getInstance().mDrivestick); 
-    ArcadeDriveCommand arcadeDriveCMD = new ArcadeDriveCommand(ControlBoard.getInstance().mShootStick); 
+    ArcadeDriveCommand arcadeDriveCMD = new ArcadeDriveCommand(ControlBoard.getInstance().mDrivestick); 
 
     ShooterControlCommand shootControlCMD = new ShooterControlCommand(ControlBoard.getInstance().mShootStick);
 
-    //IntakeControlCommand intakeControlCMD = new IntakeControlCommand(ControlBoard.getInstance().mShootStick);
+    IntakeControlCommand intakeControlCMD = new IntakeControlCommand(ControlBoard.getInstance().mDrivestick);
+
+    ClimbCommand climbCMD = new ClimbCommand(ControlBoard.getInstance().mDrivestick, ControlBoard.getInstance().mShootStick);
 
 
     mScheduler.schedule(arcadeDriveCMD);
     mScheduler.schedule(shootControlCMD);
-    //mScheduler.schedule(intakeControlCMD);
+    mScheduler.schedule(intakeControlCMD);
+    mScheduler.schedule(climbCMD);
   }
 
   /** This function is called periodically during operator control. */
@@ -114,6 +155,8 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
 
     mScheduler.run();
+
+    NavX.getInstance().pushToSmartDashboard();
 
   }
 
