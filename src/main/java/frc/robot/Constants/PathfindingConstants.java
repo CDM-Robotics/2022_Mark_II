@@ -7,5 +7,13 @@ package frc.robot.Constants;
 /** Add your docs here. */
 public class PathfindingConstants {
 
+    public static final double ROBOT_STARTING_POSITION_X = 0; 
+    public static final double ROBOT_STARTING_POSITION_y = 0; 
+    public static final double ROBOT_STARTING_POSITION_ANGLE = 0; 
+
+    // 5 to 1 gear ratio
+    public static final double TICK_TO_INCH_RATIO = 18.84956 / (2048 * 5);
+
+    public static final double WHEELBASE = 26.85;
     
 }

@@ -7,30 +7,32 @@ package frc.robot;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Add your docs here. */
 public class NavX {
 
     private static AHRS ahrs; 
+    private static NavX mNavXSys; 
 
-    public static AHRS getInstance() {
+    public static NavX getInstance() {
 
-        if (ahrs == null) {
-            ahrs = new AHRS(SPI.Port.kMXP); 
+        if (mNavXSys == null) {
+             
+            mNavXSys = new NavX(); 
+
         } 
 
-        return ahrs; 
+        return mNavXSys; 
     }
 
-    public static void connectToClassMethods(AHRS toClass) {
-         
-        if (ahrs == null) {
-            ahrs = toClass;  
-        } 
+    public NavX() {
+
+        ahrs = new AHRS(SPI.Port.kMXP); 
     }
 
-    public static void pushToSmartDashboard() {
+    public void pushToSmartDashboard() {
 
         SmartDashboard.putBoolean(  "IMU_Connected",        ahrs.isConnected());
         SmartDashboard.putBoolean(  "IMU_IsCalibrating",    ahrs.isCalibrating());

@@ -9,6 +9,8 @@ import java.lang.invoke.LambdaMetafactory;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.NavX;
@@ -20,16 +22,14 @@ public class DriveSys implements Subsystem {
 
   private static DriveSys mDriveSys; 
 
+  private DifferentialDrive mDifferentialDrive; 
+
   private WPI_TalonFX L_Master; 
   private WPI_TalonFX L_Slave;
 
   private WPI_TalonFX R_Master; 
   private WPI_TalonFX R_Slave; 
-
-  private PositionPoint CurrentPositionXYA; 
-  private PositionPoint PreviousPositionXYA;
-
-  private double totalDistanceTraveled; 
+  
 
   public static DriveSys getInstance() {
 
@@ -47,21 +47,13 @@ public class DriveSys implements Subsystem {
 
     R_Master = new WPI_TalonFX(DriveSystemConstants.RIGHT_FALCON_MASTER); 
     R_Slave = new WPI_TalonFX(DriveSystemConstants.RIGHT_FALCON_SLAVE);
-    
-    PreviousPositionXYA = new PositionPoint(DriveSystemConstants.ROBOT_STARTING_POSITION_X, DriveSystemConstants.ROBOT_STARTING_POSITION_y, 
-                                        DriveSystemConstants.ROBOT_STARTING_POSITION_ANGLE); 
-
-    CurrentPositionXYA =  new PositionPoint(DriveSystemConstants.ROBOT_STARTING_POSITION_X, DriveSystemConstants.ROBOT_STARTING_POSITION_y, 
-                                        DriveSystemConstants.ROBOT_STARTING_POSITION_ANGLE); 
-
-    totalDistanceTraveled = 0; 
 
     configMotors();
   }
 
   public void configMotors() {
 
-    L_Slave.follow(L_Master);
+    L_Master.follow(L_Slave);
     R_Slave.follow(R_Master);
 
     L_Master.setInverted(DriveSystemConstants.LEFT_FALCON_MASTER_isInverted);
@@ -72,6 +64,10 @@ public class DriveSys implements Subsystem {
 
     R_Master.getSensorCollection().setIntegratedSensorPosition(0.0, 0);
     L_Master.getSensorCollection().setIntegratedSensorPosition(0.0, 0);
+
+
+
+    mDifferentialDrive = new DifferentialDrive(L_Slave, R_Master);
     }
 
     /**
@@ -80,18 +76,88 @@ public class DriveSys implements Subsystem {
      */
     public void sideIndependentControl(double leftPercentOut, double rightPercentOut) {
 
-      R_Master.set(ControlMode.PercentOutput, rightPercentOut);
-      L_Master.set(ControlMode.PercentOutput, leftPercentOut);
+      R_Master.set(ControlMode.PercentOutput, rightPercentOut/2.3);
+      L_Slave.set(ControlMode.PercentOutput, leftPercentOut/2.3);
     }
 
-    public void arcadeDrive(double mag, double yaw) {
+    double speed = 0.8; 
+    boolean magIsPositive;
+    boolean yawIsPositive; 
 
+    public void arcadeDrive(double mag, double yaw, double speed) {
+/* 
+        double leftMag; 
+        double rightMag; 
+      
+        //mLog.periodicPrint("mag: " + mag + "  yaw: " + yaw + "  maxPercentOut: " + speed, 25);
+       
+        speed = (((0.7+(speed * 0.3)) ) / 3);
+        magIsPositive = (mag > 0);
+        yawIsPositive = (yaw > 0); 
+        
+        yaw = 1 - Math.abs(yaw);
+        
+        if (yaw > 0.9) {// to drive straight forward or backward
+
+            leftMag = mag * speed; 
+            rightMag = mag * speed; 
+
+        }else if ((yaw < 0.50) && (Math.abs(mag)< 0.35)) {// to turn in place 
+
+            yaw = 1 - yaw; 
+
+            if (yawIsPositive) {
+
+                leftMag = yaw * speed / 1.4;
+                rightMag = yaw * speed * -1 / 1.4;
+            } else {
+
+                leftMag = yaw * speed * -1 / 1.4;
+                rightMag = yaw * speed / 1.4;
+            }
+
+        } else { // to turn and move. 
+        
+            mag = DriveSystemConstants.DRIVE_MIN_PERCENT_OUT + ((mag * mag) * (1 - DriveSystemConstants.DRIVE_MIN_PERCENT_OUT));
+            
+            if (magIsPositive) {
+
+                if (yawIsPositive) {
+
+                    leftMag = mag * speed; 
+                    rightMag = mag * (0.5 + (yaw/2)) * speed; 
+                }else{
+
+                    rightMag = mag * speed; 
+                    leftMag = mag * (0.5 + (yaw/2)) * speed; 
+                }
+
+            }else{
+
+                if (yawIsPositive) {
+
+                    leftMag = mag * speed * -1; 
+                    rightMag = mag * (0.5 + (yaw/2)) * speed * -1;
+                }else{
+
+                    rightMag = mag * speed * -1; 
+                    leftMag = mag * (0.5 + (yaw/2)) * speed * -1; 
+                }
+            }     
+        }  
+
+        L_Master.set(ControlMode.PercentOutput, leftMag);
+        R_Master.set(ControlMode.PercentOutput, rightMag); */
+
+
+
+        mDifferentialDrive.arcadeDrive((mag * (0.35 + (0.2 * speed))) , (yaw * (0.35 + (0.2 * speed))), false);
       
     }
 
     public double getLeftTicks() {
 
-      return L_Master.getSensorCollection().getIntegratedSensorPosition();
+      return -L_Master.getSensorCollection().getIntegratedSensorPosition();
     }
 
     public double getLeftVelocity() {
@@ -115,114 +181,4 @@ public class DriveSys implements Subsystem {
       return ticks; 
     }
 
-    private void pushToSmartDashboard() {
-
-      SmartDashboard.putNumber("x position: ", CurrentPositionXYA.xCoord);
-      SmartDashboard.putNumber("y position: ", CurrentPositionXYA.yCoord);
-      SmartDashboard.putNumber("total distance traveled: ", totalDistanceTraveled);
-
-      SmartDashboard.putNumber("x position inches: ", CurrentPositionXYA.xCoord * DriveSystemConstants.TICK_TO_INCH_RATIO);
-      SmartDashboard.putNumber("y position inches: ", CurrentPositionXYA.yCoord * DriveSystemConstants.TICK_TO_INCH_RATIO);
-      SmartDashboard.putNumber("total distance traveled inches: ", totalDistanceTraveled * DriveSystemConstants.TICK_TO_INCH_RATIO);
-      
-
-      SmartDashboard.putNumber("right side ticks:  ", R_Master.getSensorCollection().getIntegratedSensorPosition()); 
-      SmartDashboard.putNumber("left side ticks: ", -1 * L_Master.getSensorCollection().getIntegratedSensorPosition());
-    }
-
-    public PositionPoint getAbsolutePosition() {
-
-      PreviousPositionXYA = CurrentPositionXYA; 
-
-      double relativeDistanceTicksLeft = -L_Master.getSensorCollection().getIntegratedSensorPosition() + PreviousPositionXYA.leftTicks; 
-      double relativeDistanceTicksRight = R_Master.getSensorCollection().getIntegratedSensorPosition() - PreviousPositionXYA.rightTicks; 
-
-      //double angle = Math.abs(PreviousPositionXYA.angle - NavX.getInstance().getFusedHeading());
-      double AngleChange = Math.abs((360 * (relativeDistanceTicksLeft - relativeDistanceTicksRight) * DriveSystemConstants.TICK_TO_INCH_RATIO) / (26.85 * 2 * Math.PI)); 
-
-      if (relativeDistanceTicksRight > relativeDistanceTicksLeft) {
-        AngleChange = AngleChange * -1; 
-      }
-
-      double AngleChangeAbsolute = Math.abs(AngleChange); 
-
-      SmartDashboard.putNumber("angleChange", AngleChange); 
-      SmartDashboard.putNumber("angleChangeAbsolute", AngleChangeAbsolute);
-      
-
-      //SmartDashboard.putNumber("relative distance inches right", relativeDistanceTicksRight); 
-      //SmartDashboard.putNumber("relative distance inches left", relativeDistanceTicksLeft);
-
-      //SmartDashboard.putNumber("previous ticks left", PreviousPositionXYA.leftTicks); 
-      //SmartDashboard.putNumber("previous ticks right", PreviousPositionXYA.rightTicks); 
-
-      //SmartDashboard.putNumber("radius left side ", relativeDistanceTicksLeft / (2 * Math.PI * (AngleChange / 360))); // radius of the circle generated by left side
-      //SmartDashboard.putNumber("radius right side ", relativeDistanceTicksRight / (2 * Math.PI * (AngleChange / 360))); //radius for the right side circl 
-      
-      double distanceTraveled; 
-      
-      if (AngleChange != 0) {
-
-      // Center radius is the average of the 2 radius 
-
-      distanceTraveled = (Math.sin(AngleChangeAbsolute) * ((relativeDistanceTicksRight / (2 * Math.PI * (AngleChangeAbsolute / 360))) + (relativeDistanceTicksLeft / (2 * Math.PI * (AngleChangeAbsolute / 360)))) / 2) /
-                                (Math.sin(0.5 * (180 - AngleChangeAbsolute))); 
-
-      SmartDashboard.putNumber("distance traveled relative", distanceTraveled ); 
-
-    }else{
-      distanceTraveled = (relativeDistanceTicksLeft + relativeDistanceTicksRight) / 2; 
-    }
-
-    double angleRelative; 
-    double angleTestable = (PreviousPositionXYA.angleCumulative + AngleChange) % 360; 
-
-    int yMod; 
-    int xMod; 
-
-    if (angleTestable < 0) {
-
-      angleTestable += 360; 
-    }
-
-    if ((90 <= angleTestable) && (angleTestable < 180)) {
-
-      angleRelative = 180 - angleTestable; 
-      xMod = -1; 
-      yMod = 1; 
-    } else if ((180 <= angleTestable) && (angleTestable < 270)) {
-
-      angleRelative = angleTestable - 180; 
-      xMod = -1; 
-      yMod = -1; 
-    } else if ((270 <= angleTestable) && (angleTestable < 360)) {
-
-      angleRelative = 360 - angleTestable; 
-      xMod = 1; 
-      yMod = -1; 
-    } else {
-
-      angleRelative = angleTestable; 
-      xMod = 1; 
-      yMod = 1; 
-    }
-      SmartDashboard.putNumber("Cumulotive angle previous", PreviousPositionXYA.angleCumulative); 
-      SmartDashboard.putNumber("angle relative", angleRelative);
-
-      CurrentPositionXYA.yCoord += Math.sin(angleRelative) * distanceTraveled * yMod; 
-      CurrentPositionXYA.xCoord += Math.cos(angleRelative) * distanceTraveled * xMod;
-
-      CurrentPositionXYA.leftTicks = L_Master.getSensorCollection().getIntegratedSensorPosition(); 
-      CurrentPositionXYA.rightTicks = R_Master.getSensorCollection().getIntegratedSensorPosition(); 
-
-      totalDistanceTraveled += distanceTraveled; 
-
-      CurrentPositionXYA.angleCumulative += AngleChange; 
-
-
-      pushToSmartDashboard();
-
-      return CurrentPositionXYA; 
-
-    }
 }
