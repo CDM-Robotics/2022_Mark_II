@@ -37,7 +37,7 @@ public class ClimbCommand extends CommandBase {
 
     //ClimberSys.getInstance().ClimberRun(-mAction.getY(), mAction.getRawButtonPressed(9), mAction.getRawButtonPressed(10));
     
-    ClimberSys.getInstance().ClimberRun(mStick5.getRawButton(3), mStick5.getRawButton(5), mStick5.getRawButton(4), mStick5.getRawButton(6));
+    ClimberSys.getInstance().ClimberRun(mStick5.getRawButton(3), mStick5.getRawButton(4), mStick5.getRawButton(5), mStick5.getRawButton(6));
 
     if(mStick5.getRawButtonPressed(11)) {
       ClimberSys.getInstance().toggleRight();

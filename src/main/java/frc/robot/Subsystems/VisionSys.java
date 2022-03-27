@@ -5,6 +5,7 @@
 package frc.robot.Subsystems;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants.VisionCostants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -55,6 +56,20 @@ public class VisionSys implements Subsystem {
 
         return tv.getDouble(0); 
     }
+
+    public double getDistanceToTargetInches() {
+
+        double angleToGoal = VisionCostants.limelightMountAngleDegrees + getY();
+        angleToGoal *= Math.PI / 180.0;
+
+        double distanceToTargetInches = (VisionCostants.GOAL_HEIGHT_INCHES - VisionCostants.LIMELIGHT_MOUNT_HEIGHT_INCHES) / Math.tan(angleToGoal);
+
+        SmartDashboard.putNumber("Limelight Distance To Target", distanceToTargetInches);
+
+        return distanceToTargetInches;
+    }
+
+    
 
     
 

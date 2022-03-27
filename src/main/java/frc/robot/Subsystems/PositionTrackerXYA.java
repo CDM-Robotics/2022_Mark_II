@@ -57,11 +57,16 @@ public class PositionTrackerXYA {
 
     public void pushToSmartDashboard() {
 
-        SmartDashboard.putNumber("X", presentXYA.xCoord); 
-        SmartDashboard.putNumber("Y", presentXYA.yCoord); 
-        SmartDashboard.putNumber("Heading", presentXYA.angleCumulative); 
+        //SmartDashboard.putNumber("X", presentXYA.xCoord); 
+        //SmartDashboard.putNumber("Y", presentXYA.yCoord); 
+        //SmartDashboard.putNumber("Heading", presentXYA.angleCumulative); 
     }
 
+    public void calc() {
+      
+      double leftRelativeTicks = DriveSys.getInstance().getLeftTicks() - pastXYA.leftTicks; 
+      double rightRelativeTicks = DriveSys.getInstance().getRightTicks() - pastXYA.rightTicks;
+    }
     /**
      * runs in periodic
      * Method generates a distance traveled relative to its previous 
@@ -91,8 +96,8 @@ public class PositionTrackerXYA {
 
       double AngleChangeAbsolute = Math.abs(AngleChange); 
 
-      SmartDashboard.putNumber("angleChange", AngleChange); 
-      SmartDashboard.putNumber("angleChangeAbsolute", AngleChangeAbsolute);
+      //SmartDashboard.putNumber("angleChange", AngleChange); 
+      //SmartDashboard.putNumber("angleChangeAbsolute", AngleChangeAbsolute);
 
       
       
@@ -115,7 +120,7 @@ public class PositionTrackerXYA {
       distanceTraveled = (Math.sin(AngleChangeAbsolute) * ((relativeDistanceTicksRight / (2 * Math.PI * (AngleChangeAbsolute / 360))) + (relativeDistanceTicksLeft / (2 * Math.PI * (AngleChangeAbsolute / 360)))) / 2) /
                                 (Math.sin(0.5 * (180 - AngleChangeAbsolute))); 
 
-      SmartDashboard.putNumber("distance traveled relative", distanceTraveled ); 
+      //SmartDashboard.putNumber("distance traveled relative", distanceTraveled ); 
 
     }else{
       distanceTraveled = (relativeDistanceTicksLeft + relativeDistanceTicksRight) / 2; 
@@ -153,8 +158,8 @@ public class PositionTrackerXYA {
       xMod = 1; 
       yMod = 1; 
     }
-      SmartDashboard.putNumber("Cumulotive angle previous", pastXYA.angleCumulative); 
-      SmartDashboard.putNumber("angle relative", angleRelative);
+      //SmartDashboard.putNumber("Cumulotive angle previous", pastXYA.angleCumulative); 
+      //SmartDashboard.putNumber("angle relative", angleRelative);
 
       presentXYA.yCoord += Math.sin(angleRelative) * distanceTraveled * yMod; 
       presentXYA.xCoord += Math.cos(angleRelative) * distanceTraveled * xMod;
@@ -167,8 +172,5 @@ public class PositionTrackerXYA {
       presentXYA.angleCumulative += AngleChange; 
 
     }
-
-
-
     
 }

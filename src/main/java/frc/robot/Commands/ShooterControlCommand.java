@@ -32,7 +32,6 @@ public class ShooterControlCommand extends CommandBase {
     ShooterSys.getInstance().shooterAimControl(mStick1);
     ShooterSys.getInstance().ShooterSpinUpToggle(mStick1.getRawButtonPressed(6), mStick1.getRawButton(5));
     ShooterSys.getInstance().pushToSmartDashboard();
-    ShooterSys.getInstance().defaultPosition(mStick1.getRawButtonPressed(4));
 
     SmartDashboard.putNumber("stick y", mStick1.getRawAxis(3)); 
     SmartDashboard.putNumber("stick x", mStick1.getX()); 

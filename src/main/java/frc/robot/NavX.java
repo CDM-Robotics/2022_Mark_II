@@ -32,6 +32,24 @@ public class NavX {
         ahrs = new AHRS(SPI.Port.kMXP); 
     }
 
+    public void setInitial(double angle) {
+        ahrs.setAngleAdjustment(angle);
+    }
+
+    public double getYaw() {
+        return ahrs.getYaw(); 
+    }
+
+    public double getRoll() {
+        return ahrs.getRoll(); 
+    } 
+
+    public double getPitch() {
+        return ahrs.getPitch();
+    }
+
+
+
     public void pushToSmartDashboard() {
 
         SmartDashboard.putBoolean(  "IMU_Connected",        ahrs.isConnected());

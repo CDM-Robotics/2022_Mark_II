@@ -5,7 +5,9 @@
 package frc.robot.Pathfinder.Path;
 
 /** Add your docs here. */
-public class MotionProfile {
+public class PositionActionPoint {
 
-    
+    double x, y, h, t;
+
+    String Action;
 }

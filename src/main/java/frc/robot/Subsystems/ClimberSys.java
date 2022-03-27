@@ -9,7 +9,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.PIDBase.PercentageTolerance;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberSystemConstants;
@@ -67,33 +66,7 @@ public class ClimberSys implements Subsystem {
 
   private boolean isDefaultPosition = false; 
 
-  private boolean climbSequenceInProgress = false; 
-  public void climbSequence(boolean wasPressed) {    
-
-    if (wasPressed) {
-
-      timeCounter = 0; 
-      climbSequenceInProgress = true; 
-      ShooterSys.getInstance().defaultPosition(wasPressed);
-    }
-
-    if (climbSequenceInProgress) {
-
-      if (isDefaultPosition == false) {
-
-        if (ShooterSys.getInstance().defaultPosition(false)) {
-          
-          isDefaultPosition = true;
-
-          extendPnematicArms();
-        }
-        
-      }
-
-      grabTheBar();
-    }
-
-  }
+  private boolean climbSequenceInProgress = false;
 
 
   private void extendPnematicArms() {

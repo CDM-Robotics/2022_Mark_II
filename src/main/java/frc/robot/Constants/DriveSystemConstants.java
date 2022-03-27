@@ -7,8 +7,8 @@ package frc.robot.Constants;
 /** Add your docs here. */
 public class DriveSystemConstants {
 
-    public static final int LEFT_FALCON_MASTER = 5; 
-    public static final int LEFT_FALCON_SLAVE = 4; 
+    public static final int LEFT_FALCON_MASTER = 4; 
+    public static final int LEFT_FALCON_SLAVE = 5; 
     public static final int RIGHT_FALCON_MASTER = 6; 
     public static final int RIGHT_FALCON_SLAVE = 7; 
 

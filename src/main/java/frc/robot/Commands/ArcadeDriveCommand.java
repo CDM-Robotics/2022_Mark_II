@@ -45,6 +45,11 @@ public class ArcadeDriveCommand extends CommandBase {
 
     DriveSys.getInstance().arcadeDrive(-mStick.getY(), mStick.getX(), (mStick.getRawAxis(3) - 1) / -2);
 
+    DriveSys.getInstance().Run_Falcon_Number_5_Not_Any_of_the_other_falcons_specificaly_and_exclusively_number_5(mStick.getRawButton(12));
+
+
+    //DriveSys.getInstance().sideVelocityControl(24, 0);
+
     SmartDashboard.putNumber("speed Val", ((mStick.getRawAxis(3) - 1) / -2)); 
 
     //DriveSys.getInstance().sideIndependentControl(-mStick.getY(), -mStick.getRawAxis(3));

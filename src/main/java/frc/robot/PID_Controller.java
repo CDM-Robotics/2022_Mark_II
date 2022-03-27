@@ -5,25 +5,29 @@
 package frc.robot;
 
 /** Add your docs here. */
-public class PIDController {
+public class PID_Controller {
 
     private double kp, ki, kd; 
 
     private double errorCumulative; 
+    private double error;
 
     private double lastError;
 
-    public PIDController(double kp, double ki, double kd) {
+    private double maxAccel; 
+
+    public PID_Controller(double kp, double ki, double kd, double maxAccel) {
 
         this.kp = kp; 
         this.ki = ki; 
         this.kd = kd; 
+
+        this.maxAccel = maxAccel; 
     }
 
     public double calc(double target, double current) {
 
         double output;
-        double error; 
         double dError;
 
         error = target - current; 
@@ -35,6 +39,21 @@ public class PIDController {
         output = (kp * error) + (ki * errorCumulative) + (kd * dError);
 
         lastError = error;
+ 
+        output = current + output;
+
+        if (current > (output) ) {
+
+            if ((current - output) > maxAccel) {
+                return current - maxAccel;
+            }
+
+        } else { 
+
+            if ((output - current) > maxAccel) {
+                return current + maxAccel;
+            }
+        }
 
         return output; 
     }
@@ -45,6 +64,11 @@ public class PIDController {
         this.ki = i; 
         this.kd = d; 
     } 
+
+    public double returnError() {
+
+        return error;
+    }
 
 
 }

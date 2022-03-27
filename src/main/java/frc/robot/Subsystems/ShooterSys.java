@@ -10,22 +10,29 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import org.opencv.core.Mat;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.LogitechDualAction;
+import frc.robot.PID_Controller;
 import frc.robot.Constants.ShooterSystemConstants;
+
 
 /** Add your docs here. */
 public class ShooterSys implements Subsystem{
 
     private static ShooterSys mShooterSys; 
 
+    
 
 
-    private WPI_TalonSRX mVerticalAngleControl;
+    //private WPI_TalonSRX mVerticalAngleControl;
     private WPI_TalonSRX mHorizontalAngleControl;
 
     private WPI_TalonFX mShooterMaster; 
@@ -36,8 +43,14 @@ public class ShooterSys implements Subsystem{
     private DigitalInput IntakeSide; 
     private DigitalInput InverseSide; 
 
+    private PID_Controller mDefaultFrontSideVelocityController;
+    private PID_Controller mInverseFrontSideVelocityController;
 
-    private static double ShooterSpin = 0.46; 
+    private PID_Controller mVisionCorrection; 
+
+    ShuffleboardTab shooterTuningShuffleboardTab;
+    NetworkTableEntry ShooterSpeed;
+
 
     public static ShooterSys getInstance() {
 
@@ -51,7 +64,7 @@ public class ShooterSys implements Subsystem{
 
     public ShooterSys() {
 
-        mVerticalAngleControl = new WPI_TalonSRX(ShooterSystemConstants.verticalControlTalon); 
+        //mVerticalAngleControl = new WPI_TalonSRX(ShooterSystemConstants.verticalControlTalon); 
         mHorizontalAngleControl = new WPI_TalonSRX(ShooterSystemConstants.horizontalControlTalon);
 
         mShooterMaster = new WPI_TalonFX(ShooterSystemConstants.ShooterMaster); 
@@ -59,7 +72,19 @@ public class ShooterSys implements Subsystem{
 
         mSerializer = new WPI_TalonSRX(ShooterSystemConstants.Serializer); 
 
+
+
+        mDefaultFrontSideVelocityController = new PID_Controller(2, 0, 0.00, 2500);
+
+        mInverseFrontSideVelocityController = new PID_Controller(2, 0.00, 0.1, 2500);
+
+        mVisionCorrection = new PID_Controller(0.6, 0, 0.0, 30); 
         config();
+
+        shooterTuningShuffleboardTab = Shuffleboard.getTab("Shooter Tuning"); 
+
+        ShooterSpeed = shooterTuningShuffleboardTab.add("Speed", 0).getEntry();
+
 
     }
 
@@ -68,85 +93,30 @@ public class ShooterSys implements Subsystem{
         mShooterMaster.setInverted(ShooterSystemConstants.ShooterMaster_isInverted);
         mShooterSlave0.setInverted(ShooterSystemConstants.ShooterSlave0_isInverted);
 
-        mVerticalAngleControl.setInverted(ShooterSystemConstants.verticalInverted);
+        //mVerticalAngleControl.setInverted(ShooterSystemConstants.verticalInverted);
         mHorizontalAngleControl.setInverted(ShooterSystemConstants.horizontalInverted);
 
-        mVerticalAngleControl.setSelectedSensorPosition(ShooterSystemConstants.verticalEncoderInitial); 
+        //mVerticalAngleControl.setSelectedSensorPosition(ShooterSystemConstants.verticalEncoderInitial); 
         mHorizontalAngleControl.setSelectedSensorPosition(ShooterSystemConstants.horizontalEncoderInitial);
 
-        mVerticalAngleControl.getSensorCollection().setQuadraturePosition(0, 0);
+        mShooterMaster.configVoltageCompSaturation(10); 
+        mShooterMaster.enableVoltageCompensation(true);
+
+        mShooterSlave0.configVoltageCompSaturation(10);
+        mShooterSlave0.enableVoltageCompensation(true); 
+
+        //mVerticalAngleControl.getSensorCollection().setQuadraturePosition(0, 0);
 
         mShooterMaster.setSelectedSensorPosition(0.0); 
         mShooterSlave0.setSelectedSensorPosition(0.0);
 
+        mShooterSlave0.setSensorPhase(true);
+
         IntakeSide = new DigitalInput(ShooterSystemConstants.IntakeSideLimitNumber); 
         InverseSide = new DigitalInput(ShooterSystemConstants.InverseSideLimitNumber); 
 
-        mShooterSlave0.follow(mShooterMaster);
-    }
-
-    private int isDefaulting = 0; 
-    public boolean defaultPosition(boolean wasPressed) {
-
-        if (wasPressed) {
-
-            isDefaulting -= 1; 
-            isDefaulting = Math.abs(isDefaulting); 
-        }
-
         
-
-        double defaultVerticalCorrection =  + (0.9 * Math.abs((mVerticalAngleControl.getSensorCollection().getQuadraturePosition() / 90.0) * (mVerticalAngleControl.getSensorCollection().getQuadraturePosition() / 90.0)));
-
-        double defaultHorrizontalCorrection = (Math.abs((mHorizontalAngleControl.getSelectedSensorPosition() / 3000)));
-        double defaultHorrizontalCorrectionNegativeSide = 0.10 + (Math.abs((mHorizontalAngleControl.getSelectedSensorPosition() / 4000) * (mHorizontalAngleControl.getSelectedSensorPosition() / 4000)));
-
-        if (defaultHorrizontalCorrection > 0.7) {
-            defaultHorrizontalCorrection = 0.7;
-        }
-
-        if (defaultVerticalCorrection > 0.7) {
-            defaultVerticalCorrection = 0.7;
-        }
-        SmartDashboard.putNumber("default y correction", defaultVerticalCorrection);
-        SmartDashboard.putNumber("default x correction +", defaultHorrizontalCorrection);
-        SmartDashboard.putNumber("default x correction -", defaultHorrizontalCorrectionNegativeSide);
-
-        if (isDefaulting > 0) {
-
-            if (mVerticalAngleControl.getSensorCollection().getQuadraturePosition() < -35) {
-
-                mVerticalAngleControl.set(ControlMode.PercentOutput, defaultVerticalCorrection);
-            } else { 
-                mVerticalAngleControl.set(ControlMode.PercentOutput, 0);
-            }
-
-
-            if (mHorizontalAngleControl.getSelectedSensorPosition() >= 10) {
-
-                mHorizontalAngleControl.set(ControlMode.PercentOutput, defaultHorrizontalCorrection);
-            } else if (mHorizontalAngleControl.getSelectedSensorPosition() <= -10) {
-
-                mHorizontalAngleControl.set(ControlMode.PercentOutput, -defaultHorrizontalCorrection);
-            } else {
-
-                mHorizontalAngleControl.set(ControlMode.PercentOutput, 0);
-            }
-            
-
-        }
-
-        if (((mHorizontalAngleControl.getSelectedSensorPosition() <= 15) && (mHorizontalAngleControl.getSelectedSensorPosition() >= -15)) && (mVerticalAngleControl.getSensorCollection().getQuadraturePosition() > -25)) {
-
-            isDefaulting = 0; 
-            return true;
-        } else {
-
-            return true; 
-        }
-
-        
-
+        //mShooterSlave0.follow(mShooterMaster);
     }
 
     private double ComputerControlStrength = 0; 
@@ -167,7 +137,7 @@ public class ShooterSys implements Subsystem{
             yCorrection = VisionSys.getInstance().getY() / 20.5;
 
             mHorizontalAngleControl.set(ControlMode.PercentOutput, xCorrection);
-            mVerticalAngleControl.set(ControlMode.PercentOutput, 0);
+            //mVerticalAngleControl.set(ControlMode.PercentOutput, 0);
         } 
 
         if (shoot) {
@@ -178,17 +148,16 @@ public class ShooterSys implements Subsystem{
             runSerializer(false);
         }
 
-
     }
 
     public void shooterAimControl(LogitechDualAction mController) {
 
-        if (mVerticalAngleControl.getSelectedSensorPosition() < -450) {
+        // if (mVerticalAngleControl.getSelectedSensorPosition() < -450) {
 
-            mHorizontalAngleControl.setInverted(true);
-        } else { 
-            mHorizontalAngleControl.setInverted(false);
-        }
+        //     mHorizontalAngleControl.setInverted(true);
+        // } else { 
+        //     mHorizontalAngleControl.setInverted(false);
+        // }
 
         xCorrection = VisionSys.getInstance().getX() / 27; 
         yCorrection = VisionSys.getInstance().getY() / 20.5;
@@ -196,34 +165,19 @@ public class ShooterSys implements Subsystem{
         xCorrection = xCorrection; 
         //yCorrection = -yCorrection;
 
+        double tVertical; 
+        double tHorizontal;
+
         yCorrection = 0;
 
         if (mController.getRawButton(2)) {
 
-            ComputerControlStrength = 1; 
+            tHorizontal = -mVisionCorrection.calc(0, xCorrection);
+            tVertical = mController.getRawAxis(3);
         } else {
 
-            ComputerControlStrength = 0.0; 
-        }
-
-
-
-        double tVertical; 
-        double tHorizontal; 
-
-        tHorizontal = (mController.getX() * ((1 + (-ComputerControlStrength)))) + ((xCorrection * ComputerControlStrength) * Math.abs(xCorrection * ComputerControlStrength));
-        tVertical = (mController.getRawAxis(3) * ((1 + (-ComputerControlStrength)))) - ((yCorrection * ComputerControlStrength) * Math.abs(yCorrection * ComputerControlStrength));
-
-        if ((mVerticalAngleControl.getSelectedSensorPosition() > -40) && (mController.getRawAxis(3) > 0.01)) {
-
-            tVertical = 0; 
-        
-        }
-
-        if ((mVerticalAngleControl.getSelectedSensorPosition() < -760) && (mController.getRawAxis(3) < -0.01)) {
-
-
-            tVertical = 0; 
+            tHorizontal = mController.getX();
+            tVertical = mController.getRawAxis(3); 
         }
 
         if ((mController.getRawAxis(3) < -0.01) && !IntakeSide.get())  {
@@ -235,11 +189,8 @@ public class ShooterSys implements Subsystem{
 
             tVertical = 0; 
         }
-
-
         
-        
-        mVerticalAngleControl.set(ControlMode.PercentOutput, tVertical);
+        //mVerticalAngleControl.set(ControlMode.PercentOutput, tVertical);
         mHorizontalAngleControl.set(ControlMode.PercentOutput, tHorizontal);
 
         checkLimits();
@@ -259,15 +210,53 @@ public class ShooterSys implements Subsystem{
         
     }
 
-    private double tSpinVal = 0;
+    private double tDesiredSpinVal = 0;
 
     private boolean is_spinning = false; 
 
     private double past = 0; 
     private double current; 
+    
+
+
     public void ShooterSpinUpToggle(boolean is_pressed, boolean beef_isPressed) {
 
-        current = ((mShooterMaster.getSelectedSensorPosition() + mShooterSlave0.getSelectedSensorPosition()) / 2) - past;
+        //mDefaultFrontSideVelocityController.assignValues(P.getDouble(0), I.getDouble(0), D.getDouble(0));
+
+        double tMasterCorrection;
+        double tSlaveCorrection;
+
+        if ((is_spinning) && (is_pressed)) {
+
+            tDesiredSpinVal = 0; 
+            is_spinning = false;
+
+        } else if ((is_spinning == false) && (is_pressed)) {
+
+            tDesiredSpinVal = 11000;  
+            is_spinning = true;  
+        }
+
+        // if (is_spinning) {
+        //     tDesiredSpinVal = ShooterSpeed.getDouble(0) * 21777;
+        // }
+
+        double tMasterCurrentVelocity = mShooterMaster.getSelectedSensorVelocity(0); 
+        double tSlaveCurrentVelocity = mShooterSlave0.getSelectedSensorVelocity(0);
+
+        tMasterCorrection = mDefaultFrontSideVelocityController.calc(0.69 * tDesiredSpinVal, tMasterCurrentVelocity);
+        tSlaveCorrection = mInverseFrontSideVelocityController.calc(tDesiredSpinVal, tSlaveCurrentVelocity);
+
+        SmartDashboard.putNumber("shooter master velocity", tMasterCurrentVelocity);
+        SmartDashboard.putNumber("shooter Slave Velocity", tSlaveCurrentVelocity);
+        SmartDashboard.putNumber("Desired Spin Value", tDesiredSpinVal);
+
+        mShooterMaster.set(ControlMode.PercentOutput, tMasterCorrection/21777);
+        mShooterSlave0.set(ControlMode.PercentOutput, tSlaveCorrection/21777);
+        
+        SmartDashboard.putNumber("Error", mInverseFrontSideVelocityController.returnError()); 
+
+        /* current = ((mShooterMaster.getSelectedSensorPosition() + mShooterSlave0.getSelectedSensorPosition()) / 2) - past;
         past = (mShooterMaster.getSelectedSensorPosition() + mShooterSlave0.getSelectedSensorPosition()) / 2;
 
         if (beef_isPressed) {
@@ -284,22 +273,22 @@ public class ShooterSys implements Subsystem{
  
         } else if (is_pressed && is_spinning) {
 
-            tSpinVal = 0; 
+            tDesiredSpinVal = 0; 
             is_spinning = false; 
         }
 
-        if (is_spinning && (tSpinVal < ShooterSpin)) {
+        if (is_spinning && (tDesiredSpinVal < ShooterSpin)) {
 
-            tSpinVal += 0.02; 
+            tDesiredSpinVal += 0.02; 
         }
 
-        if(is_spinning && (tSpinVal > ShooterSpin)) {
+        if(is_spinning && (tDesiredSpinVal > ShooterSpin)) {
 
-            tSpinVal -= 0.02;
+            tDesiredSpinVal -= 0.02;
         }
 
 
-        mShooterMaster.set(ControlMode.PercentOutput, tSpinVal);
+        mShooterMaster.set(ControlMode.PercentOutput, tDesiredSpinVal); */
     }
 
     public void pushToSmartDashboard() {
@@ -316,11 +305,11 @@ public class ShooterSys implements Subsystem{
 
     public void checkLimits() {
 
-        SmartDashboard.putBoolean("IntakeSideLimit", IntakeSide.get());
-        SmartDashboard.putBoolean("InverseSideLimit", InverseSide.get());
-        SmartDashboard.putNumber("Vel Shooter", current);
-        SmartDashboard.putNumber("master", mShooterMaster.getSelectedSensorPosition()); 
-        SmartDashboard.putNumber("slave", mShooterSlave0.getSelectedSensorPosition());
+        //SmartDashboard.putBoolean("IntakeSideLimit", IntakeSide.get());
+        //SmartDashboard.putBoolean("InverseSideLimit", InverseSide.get());
+        //SmartDashboard.putNumber("Vel Shooter", current);
+        //SmartDashboard.putNumber("master", mShooterMaster.getSelectedSensorPosition()); 
+        //SmartDashboard.putNumber("slave", mShooterSlave0.getSelectedSensorPosition());
 
         
     }
