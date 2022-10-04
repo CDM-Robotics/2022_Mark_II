@@ -5,6 +5,8 @@
 package frc.robot.Subsystems;
 
 import java.lang.invoke.LambdaMetafactory;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -179,6 +181,17 @@ public class DriveSys implements Subsystem {
 
       //return ticks * 18.84956 / 2048;
       return ticks; 
+    }
+
+    public ArrayList <WPI_TalonFX> getMotorList() 
+    {
+      ArrayList <WPI_TalonFX> motorList = new ArrayList <WPI_TalonFX>();
+      motorList.add(L_Master);
+      motorList.add(L_Slave);
+      motorList.add(R_Master);
+      motorList.add(R_Slave);
+      
+      return motorList;
     }
 
 }

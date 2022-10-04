@@ -26,6 +26,7 @@ import frc.robot.Subsystems.DriveSys;
 import frc.robot.Subsystems.IntakeSys;
 import frc.robot.Subsystems.PositionTrackerXYA;
 import frc.robot.Subsystems.ShooterSys;
+import frc.robot.Subsystems.ThermalReadingSys;
 import frc.robot.Subsystems.VisionSys;
 
 /**
@@ -55,7 +56,8 @@ public class Robot extends TimedRobot {
    ShooterSys.getInstance(); 
    IntakeSys.getInstance();
    VisionSys.getInstance(); 
-   ClimberSys.getInstance(); 
+   ClimberSys.getInstance();
+   ThermalReadingSys.getInstance(DriveSys.getInstance().getMotorList());
   
   PositionTrackerXYA.getInstance().CalculatePositionData(); 
   PositionTrackerXYA.getInstance().pushToSmartDashboard();
