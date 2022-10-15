@@ -11,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import org.opencv.core.Mat;
 
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -36,6 +37,11 @@ public class ShooterSys implements Subsystem{
     private DigitalInput IntakeSide; 
     private DigitalInput InverseSide; 
 
+    private double ComputerControlStrength = 0; 
+    private double xCorrection = 0; 
+    private double yCorrection = 0; 
+    private int isDefaulting = 0; 
+
 
     private static double ShooterSpin = 0.46; 
 
@@ -50,7 +56,6 @@ public class ShooterSys implements Subsystem{
     }
 
     public ShooterSys() {
-
         mVerticalAngleControl = new WPI_TalonSRX(ShooterSystemConstants.verticalControlTalon); 
         mHorizontalAngleControl = new WPI_TalonSRX(ShooterSystemConstants.horizontalControlTalon);
 
@@ -85,7 +90,7 @@ public class ShooterSys implements Subsystem{
         mShooterSlave0.follow(mShooterMaster);
     }
 
-    private int isDefaulting = 0; 
+    
     public boolean defaultPosition(boolean wasPressed) {
 
         if (wasPressed) {
@@ -149,9 +154,6 @@ public class ShooterSys implements Subsystem{
 
     }
 
-    private double ComputerControlStrength = 0; 
-    private double xCorrection = 0; 
-    private double yCorrection = 0; 
 
     public void turnAimShoot(boolean turn, boolean aim, boolean shoot) {
 
@@ -182,6 +184,8 @@ public class ShooterSys implements Subsystem{
     }
 
     public void shooterAimControl(LogitechDualAction mController) {
+        double tVertical; 
+        double tHorizontal; 
 
         if (mVerticalAngleControl.getSelectedSensorPosition() < -450) {
 
@@ -190,44 +194,36 @@ public class ShooterSys implements Subsystem{
             mHorizontalAngleControl.setInverted(false);
         }
 
-        xCorrection = VisionSys.getInstance().getX() / 27; 
-        yCorrection = VisionSys.getInstance().getY() / 20.5;
-
-        xCorrection = xCorrection; 
-        //yCorrection = -yCorrection;
-
-        yCorrection = 0;
-
-        if (mController.getRawButton(2)) {
-
+        if(mController.getRawButton(2)) {
+            if (NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").getNumber(0).intValue() != 3) {
+                NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+                NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(0);
+            }
+            
+            xCorrection = VisionSys.getInstance().getX() / 27; 
+            //yCorrection = VisionSys.getInstance().getY() / 20.5;
             ComputerControlStrength = 1; 
         } else {
-
-            ComputerControlStrength = 0.0; 
+            if (NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").getNumber(0).intValue() != 1) {
+                NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
+                NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+            }
+            //xCorrection = 0.0;
+            ComputerControlStrength = 0.0;
         }
-
-
-
-        double tVertical; 
-        double tHorizontal; 
 
         tHorizontal = (mController.getX() * ((1 + (-ComputerControlStrength)))) + ((xCorrection * ComputerControlStrength) * Math.abs(xCorrection * ComputerControlStrength));
         tVertical = (mController.getRawAxis(3) * ((1 + (-ComputerControlStrength)))) - ((yCorrection * ComputerControlStrength) * Math.abs(yCorrection * ComputerControlStrength));
 
         if ((mVerticalAngleControl.getSelectedSensorPosition() > -40) && (mController.getRawAxis(3) > 0.01)) {
-
             tVertical = 0; 
-        
         }
 
         if ((mVerticalAngleControl.getSelectedSensorPosition() < -760) && (mController.getRawAxis(3) < -0.01)) {
-
-
             tVertical = 0; 
         }
 
         if ((mController.getRawAxis(3) < -0.01) && !IntakeSide.get())  {
-
             tVertical = 0; 
         }
 
@@ -239,7 +235,7 @@ public class ShooterSys implements Subsystem{
 
         
         
-        mVerticalAngleControl.set(ControlMode.PercentOutput, tVertical);
+        //mVerticalAngleControl.set(ControlMode.PercentOutput, tVertical);
         mHorizontalAngleControl.set(ControlMode.PercentOutput, tHorizontal);
 
         checkLimits();
