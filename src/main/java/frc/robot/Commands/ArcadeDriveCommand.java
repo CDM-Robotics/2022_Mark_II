@@ -12,25 +12,29 @@ import frc.robot.Subsystems.DriveSys;
 
 public class ArcadeDriveCommand extends CommandBase {
 
-  //LogitechJoystick mStick; 
+  // Switch Between Dual Action and Joystick 
+  //LogitechDualAction mStick; 
   LogitechJoystick mStick; 
-  /** Creates a new ArcadeDriveCommand. */
+  
+/** Creates a new ArcadeDriveCommand. */
 
-
-  /*
-   public ArcadeDriveCommand(LogitechJoystick mStick) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(DriveSys.getInstance());
-
-    this.mStick = mStick; 
-  } */
-
+  //Switch between Joytick and Dual Action
+  
   public ArcadeDriveCommand(LogitechJoystick tStick) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(DriveSys.getInstance());
 
     this.mStick = tStick; 
   }
+  /*
+  public ArcadeDriveCommand(LogitechDualAction tStick) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(DriveSys.getInstance());
+
+    this.mStick = tStick; 
+  }
+  */
+
 
   // Called when the command is initially scheduled.
   @Override

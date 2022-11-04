@@ -43,7 +43,8 @@ public class ShooterSys implements Subsystem{
     private int isDefaulting = 0; 
 
 
-    private static double ShooterSpin = 0.46; 
+    private static double ShooterSpin = 0.46;
+    private static double CurrentSpin = 0.0; 
 
     public static ShooterSys getInstance() {
 
@@ -182,7 +183,7 @@ public class ShooterSys implements Subsystem{
 
 
     }
-
+    
     public void shooterAimControl(LogitechDualAction mController) {
         double tVertical; 
         double tHorizontal; 
@@ -241,7 +242,7 @@ public class ShooterSys implements Subsystem{
         checkLimits();
  
     }
-
+    
 
     public void runSerializer(boolean is_pressed) {
 
@@ -261,17 +262,30 @@ public class ShooterSys implements Subsystem{
 
     private double past = 0; 
     private double current; 
-    public void ShooterSpinUpToggle(boolean is_pressed, boolean beef_isPressed) {
+    public void ShooterSpinUpToggle(boolean is_pressed, boolean beef_isPressed, boolean beefiest_isPressed) {
 
         current = ((mShooterMaster.getSelectedSensorPosition() + mShooterSlave0.getSelectedSensorPosition()) / 2) - past;
         past = (mShooterMaster.getSelectedSensorPosition() + mShooterSlave0.getSelectedSensorPosition()) / 2;
+        
+        CurrentSpin = SmartDashboard.getNumber("Default ShooterSys Spin Speed", 0.46);
+        //CurrentSpin = 0.46;
 
         if (beef_isPressed) {
 
-            ShooterSpin = 0.90; 
+            ShooterSpin = 0.66;
+            CurrentSpin = ShooterSpin;
+             
         } else {
 
-            ShooterSpin = 0.56;
+            ShooterSpin = CurrentSpin; 
+        }
+
+        if (beefiest_isPressed) {
+
+            ShooterSpin = 0.26;
+            CurrentSpin = ShooterSpin; 
+        } else {
+            ShooterSpin = CurrentSpin;
         }
 
         if (is_pressed && !is_spinning) {

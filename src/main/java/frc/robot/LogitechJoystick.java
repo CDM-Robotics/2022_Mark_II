@@ -6,6 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 
+// Check Document For Key Binds
+
 /** Add your docs here. */
 public class LogitechJoystick extends Joystick{
 

@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.NavX;
 import frc.robot.Constants.DriveSystemConstants;
 import frc.robot.Pathfinder.Path.PositionPoint;
+//import frc.robot.LogitechDualAction;
 
 /** Add your docs here. */
 public class DriveSys implements Subsystem {
@@ -78,8 +79,15 @@ public class DriveSys implements Subsystem {
      */
     public void sideIndependentControl(double leftPercentOut, double rightPercentOut) {
 
-      R_Master.set(ControlMode.PercentOutput, rightPercentOut/2.3);
-      L_Slave.set(ControlMode.PercentOutput, leftPercentOut/2.3);
+      //Swap to which controller is needed:
+      //Joystick Mode:
+      //R_Master.set(ControlMode.PercentOutput, rightPercentOut/2.3);
+      //L_Slave.set(ControlMode.PercentOutput, leftPercentOut/2.3);
+      mDifferentialDrive.arcadeDrive(leftPercentOut, 0.0);
+      //Dual Action Mode:
+      //R_Master.set(ControlMode.PercentOutput, rightPercentOut/4.3);
+      //L_Slave.set(ControlMode.PercentOutput, leftPercentOut/4.3);
+
     }
 
     double speed = 0.8; 

@@ -28,6 +28,9 @@ import frc.robot.Subsystems.PositionTrackerXYA;
 import frc.robot.Subsystems.ShooterSys;
 import frc.robot.Subsystems.ThermalReadingSys;
 import frc.robot.Subsystems.VisionSys;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableEntry;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -50,6 +53,8 @@ public class Robot extends TimedRobot {
   public void robotInit() {
 
    mScheduler = CommandScheduler.getInstance();
+
+   SmartDashboard.putNumber("Default ShooterSys Spin Speed", 0.56);
 
    ControlBoard.getInstance(); 
    DriveSys.getInstance(); 
@@ -91,21 +96,35 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
 
-   ShooterSys.getInstance().ShooterSpinUpToggle(true, false);
+   ShooterSys.getInstance().ShooterSpinUpToggle(true, false, false);
    AutoCount = 0;
-  }
+   extendIntake = true;
 
+   NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+
+  }
+  boolean extendIntake;
   int AutoCount = 0; 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
     
-    ShooterSys.getInstance().ShooterSpinUpToggle(false, false);
-  if (AutoCount < 125) {
+    ShooterSys.getInstance().ShooterSpinUpToggle(false, false, false);
+  
+  if (AutoCount < 300) {
 
-    DriveSys.getInstance().sideIndependentControl(0.3, 0.3);
+    DriveSys.getInstance().sideIndependentControl(0.25, 0.25);
+    if (extendIntake) 
+    {
+      IntakeSys.getInstance().IntakeOutIn(false);
+       extendIntake = false;
+    }
+    if (!extendIntake) 
+    {
+      IntakeSys.getInstance().runIntake(true);
+    }
 
-    if (AutoCount < 50) {
+    if (AutoCount < 35) {
 
       ShooterSys.getInstance().turnAimShoot(true, false, false);
     }
@@ -135,9 +154,9 @@ public class Robot extends TimedRobot {
     mScheduler.cancelAll();
 
     
-    
-    //ArcadeDriveCommand arcadeDriveCMD = new ArcadeDriveCommand(ControlBoard.getInstance().mDrivestick); 
+    // Switch For Dual Action and Joystick
     ArcadeDriveCommand arcadeDriveCMD = new ArcadeDriveCommand(ControlBoard.getInstance().mDrivestick); 
+    //ArcadeDriveCommand arcadeDriveCMD = new ArcadeDriveCommand(ControlBoard.getInstance().tDriveStick);
 
     ShooterControlCommand shootControlCMD = new ShooterControlCommand(ControlBoard.getInstance().mShootStick);
 

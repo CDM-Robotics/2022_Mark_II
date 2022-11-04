@@ -28,9 +28,9 @@ public class ShooterControlCommand extends CommandBase {
   @Override
   public void execute() {
 
-    ShooterSys.getInstance().runSerializer(mStick1.getRawButton(8));
+    ShooterSys.getInstance().runSerializer(mStick1.getRawButton(1));
     ShooterSys.getInstance().shooterAimControl(mStick1);
-    ShooterSys.getInstance().ShooterSpinUpToggle(mStick1.getRawButtonPressed(6), mStick1.getRawButton(5));
+    ShooterSys.getInstance().ShooterSpinUpToggle(mStick1.getRawButtonPressed(6), mStick1.getRawButton(11), mStick1.getRawButton(12));
     ShooterSys.getInstance().pushToSmartDashboard();
     ShooterSys.getInstance().defaultPosition(mStick1.getRawButtonPressed(4));
 
